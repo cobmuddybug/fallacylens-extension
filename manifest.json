@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Fallacy Lens",
+  "version": "0.1.0",
+  "description": "Right-click selected text to check it for 24 common logical fallacies, scored by Jev. Bring your own OpenRouter key.",
+  "minimum_chrome_version": "116",
+  "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
+  "host_permissions": ["https://openrouter.ai/*"],
+  "background": { "service_worker": "src/background.js", "type": "module" },
+  "options_ui": { "page": "src/options.html", "open_in_tab": true },
+  "action": { "default_title": "Fallacy Lens settings" },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

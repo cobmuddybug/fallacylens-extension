@@ -1,0 +1,7 @@
+{
+  "name": "fallacylens-extension",
+  "private": true,
+  "type": "module",
+  "description": "Chrome extension: right-click selected text to score it for 24 logical fallacies with Jev.",
+  "license": "MIT"
+}
