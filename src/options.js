@@ -1,5 +1,6 @@
 // Options page: check and save the OpenRouter key, and the score threshold the card uses.
 import { validateKey, keyHint, checkKey } from "./keys.js";
+import { getKey, setKey, removeKey } from "./keystore.js";
 
 const $ = id => document.getElementById(id);
 
@@ -9,7 +10,8 @@ function say(message, isError = false) {
 }
 
 async function refresh() {
-  const { key = "", threshold = 50 } = await chrome.storage.local.get(["key", "threshold"]);
+  const key = await getKey();
+  const { threshold = 50 } = await chrome.storage.local.get("threshold");
   $("key-form").hidden = Boolean(key);
   $("key-saved").hidden = !key;
   $("hint").textContent = keyHint(key);
@@ -26,7 +28,7 @@ $("key-form").addEventListener("submit", async e => {
   $("save").disabled = true;
   try {
     await checkKey(key, fetch);
-    await chrome.storage.local.set({ key });
+    await setKey(key);
     $("key").value = "";
     say("Saved. Select text on any page, right-click, and choose Check for fallacies.");
     await refresh();
@@ -43,7 +45,7 @@ $("replace").addEventListener("click", () => {
 });
 
 $("remove").addEventListener("click", async () => {
-  await chrome.storage.local.remove("key");
+  await removeKey();
   say("Key removed.");
   await refresh();
 });

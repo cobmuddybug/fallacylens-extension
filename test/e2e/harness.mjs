@@ -93,15 +93,17 @@ class CDP {
     return new CDP(ws);
   }
   constructor(ws) {
-    this.ws = ws; this.id = 0; this.pending = new Map();
+    this.ws = ws; this.id = 0; this.pending = new Map(); this.listeners = new Set();
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
+      if (m.method) for (const fn of this.listeners) fn(m);
       const p = m.id && this.pending.get(m.id);
       if (!p) return;
       this.pending.delete(m.id);
       m.error ? p.rej(new Error(`${p.method}: ${m.error.message}`)) : p.res(m.result);
     };
   }
+  on(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   send(method, params = {}, sessionId) {
     const id = ++this.id;
     this.ws.send(JSON.stringify({ id, method, params, sessionId }));
@@ -202,6 +204,18 @@ export async function setup() {
       await fallacyLensCheck({ menuItemId: "fallacylens-check", frameId: 0, selectionText: ${JSON.stringify(selectionText)} }, tab);
     })()`);
     page.card = () => page.eval(CARD);
+    /** Evaluate in the extension's content-script world on this page (exists once a card was injected). */
+    page.evalContentWorld = async expression => {
+      const contexts = [];
+      const off = cdp.on(m => { if (m.sessionId === page.sessionId && m.method === "Runtime.executionContextCreated") contexts.push(m.params.context); });
+      await page.send("Runtime.enable");
+      off();
+      const ctx = contexts.find(c => c.origin.startsWith("chrome-extension://") || c.name === "Fallacy Lens");
+      if (!ctx) throw new Error(`no content-script world among ${contexts.map(c => c.name || c.origin).join(", ")}`);
+      const r = await page.send("Runtime.evaluate", { expression, contextId: ctx.id, awaitPromise: true, returnByValue: true });
+      if (r.exceptionDetails) throw new Error(`eval: ${r.exceptionDetails.exception?.description ?? r.exceptionDetails.text}`);
+      return r.result.value;
+    };
     return page;
   }
 
@@ -213,7 +227,8 @@ export async function setup() {
       await cdp.send("Target.closeTarget", { targetId: sw.targetId });
       await waitFor(async () => !(await cdp.send("Target.getTargets")).targetInfos.some(t => t.targetId === sw.targetId), { what: "worker stopped" });
     },
-    setKey: key => sw.eval(key ? `chrome.storage.local.set({ key: ${JSON.stringify(key)} })` : `chrome.storage.local.remove("key")`),
+    setKey: key => sw.eval(key ? `fallacyLensKeyStore.setKey(${JSON.stringify(key)})` : "fallacyLensKeyStore.removeKey()"),
+    getKey: () => sw.eval("fallacyLensKeyStore.getKey()"),
     close: cleanup,
   };
 }

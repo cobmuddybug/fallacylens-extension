@@ -211,3 +211,24 @@ test("the card sends a heartbeat while a check is running", async () => {
   assert.match((await page.card()).log, /"type":"pong"/, "background should answer the card's pings");
   await page.close();
 });
+
+test("the card's content-script world cannot read the key", async () => {
+  const page = await fresh("/page.html");
+  await checkOn(page, "fallacy");
+  await cardSays(page, /Slippery slope/, "results");
+  const seen = await page.evalContentWorld("chrome.storage.local.get(null).then(o => JSON.stringify(o))");
+  assert.ok(!seen.includes(GOOD_KEY), `content script saw: ${seen}`);
+  assert.match(seen, /"threshold":50/, "the probe really reads storage.local from the content world");
+  await page.close();
+});
+
+test("a key saved by an older version is moved out of chrome.storage.local", async () => {
+  await env.setKey("");
+  await env.sw.eval(`chrome.storage.local.set({ key: ${JSON.stringify(GOOD_KEY)} })`);
+  const page = await fresh("/page.html");
+  await checkOn(page, "fallacy");
+  await cardSays(page, /Slippery slope/, "results with the migrated key");
+  assert.equal(await env.getKey(), GOOD_KEY);
+  assert.equal((await env.sw.eval("chrome.storage.local.get(null)")).key, undefined);
+  await page.close();
+});

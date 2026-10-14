@@ -1,6 +1,7 @@
 // Fallacy Lens service worker: the right-click menu, injecting the card, and the card's connection.
 // The only code that reads the OpenRouter key; the card receives scores, never the key.
 import { runCheck } from "./check.js";
+import * as keyStore from "./keystore.js";
 
 const MENU_ID = "fallacylens-check";
 const PORT_NAME = "fallacylens-card";
@@ -37,6 +38,7 @@ async function check(info, tab) {
 
 // The e2e tests call this directly, because a headless browser can't click a context menu.
 globalThis.fallacyLensCheck = check;
+globalThis.fallacyLensKeyStore = keyStore;
 
 // "Open settings" in the card. A one-off message rather than the port, because it wakes a stopped worker.
 chrome.runtime.onMessage.addListener((msg, sender) => {
@@ -57,7 +59,8 @@ chrome.runtime.onConnect.addListener(port => {
       text = (await chrome.storage.session.get(k))[k] ?? "";
       await chrome.storage.session.remove(k);
     }
-    const { key = "", threshold = 50 } = await chrome.storage.local.get(["key", "threshold"]);
+    const key = await keyStore.getKey();
+    const { threshold = 50 } = await chrome.storage.local.get("threshold");
     await runCheck(text, { key, threshold, fetch: (...a) => fetch(...a), signal: ctrl.signal, post });
   });
 });

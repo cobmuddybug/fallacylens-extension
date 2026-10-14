@@ -28,12 +28,12 @@ test("rejects an empty key and one with spaces without calling OpenRouter", asyn
 test("a key OpenRouter rejects is not saved", async () => {
   await submit("sk-or-test-wrong");
   await waitFor(async () => /rejected that key/.test(await status()), { what: "rejection" });
-  assert.equal((await storage()).key, undefined);
+  assert.equal(await env.getKey(), "");
 });
 
 test("a good key is saved, cleared from the field, and shown only as a hint", async () => {
   await submit(GOOD_KEY);
-  await waitFor(async () => (await storage()).key === GOOD_KEY, { what: "key saved" });
+  await waitFor(async () => (await env.getKey()) === GOOD_KEY, { what: "key saved" });
   assert.equal(await page.eval(`document.getElementById("hint").textContent`), "sk-or-…good");
   assert.equal(await page.eval(`document.getElementById("key").value`), "");
   assert.equal(await page.eval(`document.getElementById("key-form").hidden`), true);
@@ -48,6 +48,12 @@ test("threshold slider is stored", async () => {
 
 test("remove deletes the key and shows the form again", async () => {
   await page.eval(`document.getElementById("remove").click()`);
-  await waitFor(async () => (await storage()).key === undefined, { what: "key removed" });
+  await waitFor(async () => (await env.getKey()) === "", { what: "key removed" });
   assert.equal(await page.eval(`document.getElementById("key-form").hidden`), false);
+});
+
+test("the key is not kept in chrome.storage.local, which content scripts can read", async () => {
+  await submit(GOOD_KEY);
+  await waitFor(async () => (await env.getKey()) === GOOD_KEY, { what: "key saved" });
+  assert.equal((await storage()).key, undefined);
 });
