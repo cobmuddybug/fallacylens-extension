@@ -1,0 +1,240 @@
+[
+ {
+  "name": "single",
+  "size": 200,
+  "overlap": 60,
+  "text": "One short paragraph that fits easily.",
+  "chunks": [
+   {
+    "text": "One short paragraph that fits easily.",
+    "start": 0,
+    "end": 37
+   }
+  ]
+ },
+ {
+  "name": "paragraphs",
+  "size": 200,
+  "overlap": 60,
+  "text": "Paragraph 0 talks about topic 0 at a modest length for testing purposes.\n\nParagraph 1 talks about topic 1 at a modest length for testing purposes.\n\nParagraph 2 talks about topic 2 at a modest length for testing purposes.\n\nParagraph 3 talks about topic 3 at a modest length for testing purposes.\n\nParagraph 4 talks about topic 4 at a modest length for testing purposes.\n\nParagraph 5 talks about topic 5 at a modest length for testing purposes.\n\nParagraph 6 talks about topic 6 at a modest length for testing purposes.\n\nParagraph 7 talks about topic 7 at a modest length for testing purposes.",
+  "chunks": [
+   {
+    "text": "Paragraph 0 talks about topic 0 at a modest length for testing purposes.\n\nParagraph 1 talks about topic 1 at a modest length for testing purposes.",
+    "start": 0,
+    "end": 146
+   },
+   {
+    "text": "about topic 1 at a modest length for testing purposes.\n\nParagraph 2 talks about topic 2 at a modest length for testing purposes.\n\nParagraph 3 talks about topic 3 at a modest length for testing purposes.",
+    "start": 148,
+    "end": 294
+   },
+   {
+    "text": "about topic 3 at a modest length for testing purposes.\n\nParagraph 4 talks about topic 4 at a modest length for testing purposes.\n\nParagraph 5 talks about topic 5 at a modest length for testing purposes.",
+    "start": 296,
+    "end": 442
+   },
+   {
+    "text": "about topic 5 at a modest length for testing purposes.\n\nParagraph 6 talks about topic 6 at a modest length for testing purposes.\n\nParagraph 7 talks about topic 7 at a modest length for testing purposes.",
+    "start": 444,
+    "end": 590
+   }
+  ]
+ },
+ {
+  "name": "long-paragraph",
+  "size": 200,
+  "overlap": 60,
+  "text": "Sentence 0 is part of one long paragraph. Sentence 1 is part of one long paragraph. Sentence 2 is part of one long paragraph. Sentence 3 is part of one long paragraph. Sentence 4 is part of one long paragraph. Sentence 5 is part of one long paragraph. Sentence 6 is part of one long paragraph. Sentence 7 is part of one long paragraph. Sentence 8 is part of one long paragraph. Sentence 9 is part of one long paragraph. Sentence 10 is part of one long paragraph. Sentence 11 is part of one long paragraph. Sentence 12 is part of one long paragraph. Sentence 13 is part of one long paragraph. Sentence 14 is part of one long paragraph. Sentence 15 is part of one long paragraph. Sentence 16 is part of one long paragraph. Sentence 17 is part of one long paragraph. Sentence 18 is part of one long paragraph. Sentence 19 is part of one long paragraph.",
+  "chunks": [
+   {
+    "text": "Sentence 0 is part of one long paragraph. Sentence 1 is part of one long paragraph. Sentence 2 is part of one long paragraph. Sentence 3 is part of one long paragraph. ",
+    "start": 0,
+    "end": 168
+   },
+   {
+    "text": "Sentence 3 is part of one long paragraph. \n\nSentence 4 is part of one long paragraph. Sentence 5 is part of one long paragraph. Sentence 6 is part of one long paragraph. Sentence 7 is part of one long paragraph. ",
+    "start": 168,
+    "end": 336
+   },
+   {
+    "text": "Sentence 7 is part of one long paragraph. \n\nSentence 8 is part of one long paragraph. Sentence 9 is part of one long paragraph. Sentence 10 is part of one long paragraph. Sentence 11 is part of one long paragraph. ",
+    "start": 336,
+    "end": 506
+   },
+   {
+    "text": "Sentence 11 is part of one long paragraph. \n\nSentence 12 is part of one long paragraph. Sentence 13 is part of one long paragraph. Sentence 14 is part of one long paragraph. Sentence 15 is part of one long paragraph. ",
+    "start": 506,
+    "end": 678
+   },
+   {
+    "text": "Sentence 15 is part of one long paragraph. \n\nSentence 16 is part of one long paragraph. Sentence 17 is part of one long paragraph. Sentence 18 is part of one long paragraph. Sentence 19 is part of one long paragraph.",
+    "start": 678,
+    "end": 849
+   }
+  ]
+ },
+ {
+  "name": "questions-and-quotes",
+  "size": 150,
+  "overlap": 40,
+  "text": "He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left!",
+  "chunks": [
+   {
+    "text": "He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! ",
+    "start": 0,
+    "end": 150
+   },
+   {
+    "text": "Wait… really? (It was.) They left! \n\nHe asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! ",
+    "start": 150,
+    "end": 300
+   },
+   {
+    "text": "Wait… really? (It was.) They left! \n\nHe asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! ",
+    "start": 300,
+    "end": 450
+   },
+   {
+    "text": "Wait… really? (It was.) They left! \n\nHe asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! ",
+    "start": 450,
+    "end": 600
+   },
+   {
+    "text": "Wait… really? (It was.) They left! \n\nHe asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! ",
+    "start": 600,
+    "end": 750
+   },
+   {
+    "text": "Wait… really? (It was.) They left! \n\nHe asked, \"Is this right?\" She said no. Wait… really? (It was.) They left! He asked, \"Is this right?\" She said no. Wait… really? (It was.) They left!",
+    "start": 750,
+    "end": 899
+   }
+  ]
+ },
+ {
+  "name": "long-sentence",
+  "size": 200,
+  "overlap": 60,
+  "text": "word0 word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15 word16 word17 word18 word19 word20 word21 word22 word23 word24 word25 word26 word27 word28 word29 word30 word31 word32 word33 word34 word35 word36 word37 word38 word39 word40 word41 word42 word43 word44 word45 word46 word47 word48 word49 word50 word51 word52 word53 word54 word55 word56 word57 word58 word59 word60 word61 word62 word63 word64 word65 word66 word67 word68 word69 word70 word71 word72 word73 word74 word75 word76 word77 word78 word79 word80 word81 word82 word83 word84 word85 word86 word87 word88 word89 word90 word91 word92 word93 word94 word95 word96 word97 word98 word99 word100 word101 word102 word103 word104 word105 word106 word107 word108 word109 word110 word111 word112 word113 word114 word115 word116 word117 word118 word119 word120 word121 word122 word123 word124 word125 word126 word127 word128 word129 word130 word131 word132 word133 word134 word135 word136 word137 word138 word139 word140 word141 word142 word143 word144 word145 word146 word147 word148 word149",
+  "chunks": [
+   {
+    "text": "word0 word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15 word16 word17 word18 word19 word20 word21 word22 word23 word24 word25 word26 word27 word28 word29",
+    "start": 0,
+    "end": 199
+   },
+   {
+    "text": "word22 word23 word24 word25 word26 word27 word28 word29\n\nword30 word31 word32 word33 word34 word35 word36 word37 word38 word39 word40 word41 word42 word43 word44 word45 word46 word47 word48 word49 word50 word51 word52 word53 word54 word55 word56 word57",
+    "start": 200,
+    "end": 395
+   },
+   {
+    "text": "word50 word51 word52 word53 word54 word55 word56 word57\n\nword58 word59 word60 word61 word62 word63 word64 word65 word66 word67 word68 word69 word70 word71 word72 word73 word74 word75 word76 word77 word78 word79 word80 word81 word82 word83 word84 word85",
+    "start": 396,
+    "end": 591
+   },
+   {
+    "text": "word78 word79 word80 word81 word82 word83 word84 word85\n\nword86 word87 word88 word89 word90 word91 word92 word93 word94 word95 word96 word97 word98 word99 word100 word101 word102 word103 word104 word105 word106 word107 word108 word109 word110 word111",
+    "start": 592,
+    "end": 785
+   },
+   {
+    "text": "word105 word106 word107 word108 word109 word110 word111\n\nword112 word113 word114 word115 word116 word117 word118 word119 word120 word121 word122 word123 word124 word125 word126 word127 word128 word129 word130 word131 word132 word133 word134 word135 word136",
+    "start": 786,
+    "end": 985
+   },
+   {
+    "text": "word130 word131 word132 word133 word134 word135 word136\n\nword137 word138 word139 word140 word141 word142 word143 word144 word145 word146 word147 word148 word149",
+    "start": 986,
+    "end": 1089
+   }
+  ]
+ },
+ {
+  "name": "no-spaces",
+  "size": 200,
+  "overlap": 60,
+  "text": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+  "chunks": [
+   {
+    "text": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "start": 0,
+    "end": 200
+   },
+   {
+    "text": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "start": 200,
+    "end": 400
+   },
+   {
+    "text": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "start": 400,
+    "end": 500
+   }
+  ]
+ },
+ {
+  "name": "crlf",
+  "size": 150,
+  "overlap": 40,
+  "text": "Line paragraph 0 uses Windows line endings here.\r\n\r\nLine paragraph 1 uses Windows line endings here.\r\n\r\nLine paragraph 2 uses Windows line endings here.\r\n\r\nLine paragraph 3 uses Windows line endings here.\r\n\r\nLine paragraph 4 uses Windows line endings here.\r\n\r\nLine paragraph 5 uses Windows line endings here.\r\n\r\nLine paragraph 6 uses Windows line endings here.\r\n\r\nLine paragraph 7 uses Windows line endings here.",
+  "chunks": [
+   {
+    "text": "Line paragraph 0 uses Windows line endings here.\r\n\r\nLine paragraph 1 uses Windows line endings here.",
+    "start": 0,
+    "end": 100
+   },
+   {
+    "text": "1 uses Windows line endings here.\n\nLine paragraph 2 uses Windows line endings here.\r\n\r\nLine paragraph 3 uses Windows line endings here.",
+    "start": 104,
+    "end": 204
+   },
+   {
+    "text": "3 uses Windows line endings here.\n\nLine paragraph 4 uses Windows line endings here.\r\n\r\nLine paragraph 5 uses Windows line endings here.",
+    "start": 208,
+    "end": 308
+   },
+   {
+    "text": "5 uses Windows line endings here.\n\nLine paragraph 6 uses Windows line endings here.\r\n\r\nLine paragraph 7 uses Windows line endings here.",
+    "start": 312,
+    "end": 412
+   }
+  ]
+ },
+ {
+  "name": "messy-whitespace",
+  "size": 30,
+  "overlap": 10,
+  "text": "\n\n   First paragraph.  \n\n\n\t Second paragraph has tabs.\t\n\n \n Third.   \n",
+  "chunks": [
+   {
+    "text": "First paragraph.",
+    "start": 5,
+    "end": 21
+   },
+   {
+    "text": "paragraph.\n\nSecond paragraph has tabs.",
+    "start": 28,
+    "end": 54
+   },
+   {
+    "text": "has tabs.\n\nThird.",
+    "start": 60,
+    "end": 66
+   }
+  ]
+ },
+ {
+  "name": "empty",
+  "size": 200,
+  "overlap": 60,
+  "text": "",
+  "chunks": []
+ },
+ {
+  "name": "blank",
+  "size": 200,
+  "overlap": 60,
+  "text": "  \n\n \t ",
+  "chunks": []
+ }
+]
