@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fallacy Lens",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Right-click selected text to check it for 24 common logical fallacies, scored by Jev. Bring your own OpenRouter key.",
   "minimum_chrome_version": "116",
   "permissions": ["contextMenus", "storage", "activeTab", "scripting"],

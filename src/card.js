@@ -52,6 +52,7 @@
     .hi .score, .mid .score { color: var(--fg); font-weight: 600; }
     .detail { padding: 0 4px 10px; color: var(--muted); }
     .detail p { margin: 4px 0 0; }
+    .group { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
     .example { font-style: italic; }
     .more { color: var(--muted); padding: 8px 4px 2px; }
     .more:hover { color: var(--fg); }
@@ -175,7 +176,7 @@
 
   function row(r) {
     const detail = h("div", { class: "detail", hidden: "" },
-      h("p", { text: r.definition }), h("p", { class: "example", text: `e.g. “${r.example}”` }));
+      h("p", { class: "group", text: r.group }), h("p", { text: r.definition }), h("p", { class: "example", text: `e.g. “${r.example}”` }));
     const fill = h("span", { class: "fill" });
     fill.style.width = `${r.score}%`;
     const btn = h("button", { class: `row ${level(r.score)}`, type: "button", "aria-expanded": "false" },

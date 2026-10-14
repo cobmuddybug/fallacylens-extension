@@ -189,3 +189,32 @@ All tests use `node --test` (Node ≥ 22). No packages.
 - Keyboard shortcut trigger.
 - Syncing with the desktop app's fallacy list.
 - Publishing to the Chrome Web Store. v1 makes the store zip, and submitting it is a separate step.
+
+## Amendment (2026-10-14, v0.2.0): 69 fallacies
+
+The list grows from the poster's 24 to 69. The 45 additions come from the wider informal-fallacy
+catalogues (Wikipedia's list of fallacies, cross-checked against the IEP and the Fallacy Files). Obscure
+entries, ones that can't be judged from the text alone, and near-duplicates of the 24 were left out.
+Each fallacy now also has a `group` (Relevance, Generalisation, Cause and statistics, Language, Argument
+structure, Formal), which the card shows in the expanded detail.
+
+**Token budget, re-measured.** Jev has two separate caps, and both report `max_tokens_exceeded`:
+
+| Cap | Measured |
+|---|---|
+| Text record alone | ~32k tokens. Prose runs ~0.23 tokens per character; 135k characters of Mill passed and 142k failed. |
+| Whole request (text + questions) | ~64k input tokens. 100k characters with 250 questions passed (62.4k tokens); 300 questions failed. |
+| One `noul` question | ~156 input tokens + ~22 output tokens |
+
+Questions are scored independently: duplicates agree within about 4 points at 24, 96, 200 and 400
+questions, and latency stays near 1 s. The 69 questions take about 11k tokens, so a full 32k-token text
+still fits with room to spare. The text cap binds first, and `CHUNK_CHARS` stays at 100,000. A unit
+test estimates the question tokens and fails if a full text plus questions would go over 56k.
+
+**False alarms.** `make live` now also checks that:
+- every fallacy's own example scores 50 or more for that fallacy;
+- the 100k-character Mill filler scores below 50 on all 69.
+
+The first run failed on reification and loaded language, both triggered by Mill, and on the
+quoting-out-of-context example. Their guidance and example were tightened, and the run passed. It costs
+about 4¢.

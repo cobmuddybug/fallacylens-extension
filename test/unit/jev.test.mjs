@@ -7,10 +7,10 @@ import { fakeFetch, answers, noSleep, record } from "./fakefetch.mjs";
 const KEY = "sk-or-test-key";
 const TEXT = "If we allow this, everything will collapse and the town will be ruined forever.";
 
-test("payload carries all 24 questions in the desktop app's wording", () => {
+test("payload carries all 69 questions in the desktop app's wording", () => {
   const p = buildPayload(TEXT, 0, 1);
   assert.equal(p.model, MODEL);
-  assert.equal(Object.keys(p.questions).length, 24);
+  assert.equal(Object.keys(p.questions).length, 69);
   assert.deepEqual(p.state.records, [{ id: "text", record: TEXT }]);
   assert.equal(p.state.description, "A passage of writing submitted for logical-fallacy analysis.");
   const q = QUESTIONS.slippery_slope;
@@ -103,11 +103,18 @@ test("askJev stops when aborted", async () => {
   assert.equal(f.calls.length, 0);
 });
 
+test("questions leave room for a full text record under Jev's 64k-token request cap", () => {
+  // Measured 2026-10-14: the text record is capped near 32k tokens on its own, and the whole request
+  // (text + questions) near 64k. Questions run ~4.5 JSON chars per token; 4 is the conservative guess.
+  const questionTokens = JSON.stringify(QUESTIONS).length / 4;
+  assert.ok(32_768 + questionTokens <= 56_000, `questions ≈ ${Math.round(questionTokens)} tokens`);
+});
+
 test("aggregate takes each fallacy's peak and sorts by score, then name", () => {
   const rows = aggregate([{ strawman: 40, bandwagon: 70 }, { strawman: 70, genetic: 10 }]);
-  assert.equal(rows.length, 24);
+  assert.equal(rows.length, 69);
   assert.deepEqual(rows.slice(0, 3).map(r => [r.id, r.score]), [["bandwagon", 70], ["strawman", 70], ["genetic", 10]]);
-  assert.deepEqual(Object.keys(rows[0]).sort(), ["definition", "example", "id", "name", "score"]);
+  assert.deepEqual(Object.keys(rows[0]).sort(), ["definition", "example", "group", "id", "name", "score"]);
 });
 
 test("analyze: one chunk, sorted results, cost and progress", async () => {

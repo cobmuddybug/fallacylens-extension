@@ -1,8 +1,9 @@
 # Fallacy Lens for Chrome
 
 Select text on any page, right-click, and choose **Check for fallacies**. A card next to the selection
-scores the text for the 24 fallacies on the *thou shalt not commit logical fallacies* poster, using
-[Jev](https://openrouter.ai/typesafe) through OpenRouter. The card leads with the fallacies that score
+scores the text for 69 logical fallacies, using [Jev](https://openrouter.ai/typesafe) through OpenRouter:
+the 24 on the *thou shalt not commit logical fallacies* poster, plus 45 more from the wider catalogues
+(red herring, cherry picking, motte-and-bailey, sunk cost, affirming the consequent and others). The card leads with the fallacies that score
 highest. Click one to see what it means, with an example.
 
 Scores are Jev's estimate (0–100) that the text commits each fallacy, not a verdict.
@@ -25,7 +26,7 @@ ever sent to OpenRouter. The score threshold is kept in `chrome.storage.local`.
 
 ## How scoring works
 
-All 24 questions go to Jev in one request. Selections over 100,000 characters are split at paragraph
+All 69 questions go to Jev in one request. Selections over 100,000 characters are split at paragraph
 and sentence boundaries, with 600 characters of overlap. Each fallacy's score is its peak across the
 parts, so the card says whether the selection *as a whole* contains it. The limit is 500,000 characters.
 

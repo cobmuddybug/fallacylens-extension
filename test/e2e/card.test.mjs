@@ -25,14 +25,14 @@ test("results: top fallacies, the rest folded, definition on click", async () =>
   const c = await cardSays(page, /Slippery slope/, "results");
   assert.match(c.text, /91/);
   assert.match(c.text, /Strawman/);
-  assert.match(c.text, /21 others below 50/);
+  assert.match(c.text, /66 others below 50/);
   assert.doesNotMatch(c.text, /Bandwagon/, "rows below the threshold start folded");
   assert.match(c.text, /not a verdict/);
   assert.match(c.text, /\$0\.0003/);
   const selBottom = await page.eval("getSelection().getRangeAt(0).getBoundingClientRect().bottom");
   assert.ok(c.top >= selBottom, `card (${c.top}) should sit below the selection (${selBottom})`);
   await page.eval(`document.querySelector("fallacy-lens-card").shadowRoot.querySelector("button.row").click()`);
-  await cardSays(page, /Asserting that if we allow A[\s\S]*e\.g\. “If we let students redo one test/, "definition and example");
+  await cardSays(page, /Cause and statistics[\s\S]*Asserting that if we allow A[\s\S]*e\.g\. “If we let students redo one test/i, "group, definition and example");
   await page.close();
 });
 
@@ -42,7 +42,7 @@ test("threshold from settings decides what shows", async () => {
   await checkOn(page, "fallacy");
   const c = await cardSays(page, /Slippery slope/, "results");
   assert.doesNotMatch(c.text, /Strawman/);
-  assert.match(c.text, /23 others below 80/);
+  assert.match(c.text, /68 others below 80/);
   await page.close();
 });
 

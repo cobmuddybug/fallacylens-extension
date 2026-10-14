@@ -1,5 +1,5 @@
-// Ask Jev (through OpenRouter's decisions API) whether a text commits each of the 24 fallacies.
-// One request per chunk carries all 24 yes/no questions; a fallacy's score is its peak across chunks.
+// Ask Jev (through OpenRouter's decisions API) whether a text commits each of the 69 fallacies.
+// One request per chunk carries all 69 yes/no questions; a fallacy's score is its peak across chunks.
 
 import { FALLACIES, BY_ID } from "./fallacies.js";
 import { chunkText, halve } from "./chunk.js";
@@ -150,7 +150,7 @@ export async function askJev(key, text, index, total, { fetch, signal, sleep = r
 /** Combine per-chunk scores: a fallacy's score is its peak (one clear instance is enough). */
 export function aggregate(perChunk) {
   return FALLACIES.map(f => ({
-    id: f.id, name: f.name, definition: f.definition, example: f.example,
+    id: f.id, name: f.name, group: f.group, definition: f.definition, example: f.example,
     score: Math.max(0, ...perChunk.map(c => c[f.id] ?? 0)),
   })).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
