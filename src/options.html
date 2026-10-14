@@ -1,2 +1,50 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Fallacy Lens settings</title></head><body></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fallacy Lens settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main>
+  <h1>Fallacy Lens</h1>
+  <p class="lede">Select text on any page, right-click, and choose <strong>Check for fallacies</strong>. Jev scores it for 24 common logical fallacies.</p>
+
+  <section>
+    <h2>OpenRouter key</h2>
+    <form id="key-form">
+      <label for="key">Paste your key</label>
+      <div class="field">
+        <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-…">
+        <button id="save" type="submit">Check &amp; save</button>
+      </div>
+      <p class="tip">Create one at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>. Make a key just for this extension and give it a small credit limit. A check costs a fraction of a cent, so a dollar goes a long way.</p>
+    </form>
+    <div id="key-saved" hidden>
+      <p>Saved key: <code id="hint"></code></p>
+      <div class="buttons">
+        <button id="replace" type="button">Replace</button>
+        <button id="remove" type="button" class="quiet">Remove</button>
+      </div>
+    </div>
+    <p id="status" role="status"></p>
+  </section>
+
+  <section>
+    <h2>Show fallacies scoring</h2>
+    <div class="field">
+      <input id="threshold" type="range" min="30" max="80" step="5" value="50">
+      <output id="threshold-value" for="threshold">50</output><span>or more</span>
+    </div>
+    <p class="tip">The card lists fallacies at or above this score first. The rest stay one click away.</p>
+  </section>
+
+  <section>
+    <h2>Privacy</h2>
+    <p>Selected text is sent to OpenRouter and Jev's maker, TypeSafe, only when you choose <strong>Check for fallacies</strong>. Fallacy Lens has no analytics and keeps no history. It stores only your key and this setting, on this device.</p>
+  </section>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>
