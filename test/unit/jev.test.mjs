@@ -188,3 +188,14 @@ test("askJev times out a stalled request and retries it as a network error", asy
     e => e.type === "network" && /too long/.test(e.message));
   assert.equal(f.calls.length, 2);
 });
+
+test("an abort while the response body is being read is a cancel, not a format error", async () => {
+  const ctrl = new AbortController();
+  const f = async () => ({ ok: true, status: 200, headers: new Headers(),
+    text: async () => { ctrl.abort(); throw new DOMException("aborted", "AbortError"); } });
+  await assert.rejects(askJev(KEY, TEXT, 0, 1, { fetch: f, signal: ctrl.signal, sleep: noSleep }), e => e.type === "aborted");
+});
+
+test("an empty-string score falls through to the next field, like the desktop app", () => {
+  assert.equal(yesProbability({ noul: "", probability: 0.4 }), 0.4);
+});

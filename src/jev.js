@@ -56,7 +56,7 @@ const clamp01 = v => Math.max(0, Math.min(1, v));
 function readProbability(answer) {
   for (const k of ["noul", "probability"]) {
     const v = Number(answer?.[k]);
-    if (answer?.[k] != null && Number.isFinite(v)) return clamp01(v);
+    if (answer?.[k] != null && answer[k] !== "" && Number.isFinite(v)) return clamp01(v);
   }
   const probs = answer?.probabilities;
   if (probs && typeof probs === "object") {
@@ -124,6 +124,7 @@ export async function askJev(key, text, index, total, { fetch, signal, sleep = r
     }
     if (res) {
       const raw = await res.text().catch(() => "");
+      if (signal?.aborted) throw aborted();
       let data = null;
       try { data = JSON.parse(raw); } catch { /* not JSON */ }
       if (res.ok) {

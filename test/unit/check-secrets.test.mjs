@@ -38,3 +38,9 @@ test("fails on a personal home path", () => {
   const dir = scratch(["see /", "home/", "someone/Projects/x"].join("") + "\n");
   try { assert.equal(run(dir).status, 1); } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test("fails on a future OpenRouter key format", () => {
+  const fake = "sk-or-v2-" + "Ab9".repeat(12);
+  const dir = scratch(`key = ${fake}\n`);
+  try { assert.equal(run(dir).status, 1); } finally { rmSync(dir, { recursive: true, force: true }); }
+});
