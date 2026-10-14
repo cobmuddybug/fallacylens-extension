@@ -59,3 +59,9 @@ test("halve falls back to a space, then a hard cut, never splitting a pair", () 
   assert.ok(!LONE_SURROGATE.test(p) && !LONE_SURROGATE.test(q));
   assert.equal(p + q, "😀".repeat(101));
 });
+
+test("zero overlap carries nothing into the next chunk", () => {
+  assert.equal(tail("Some earlier text.", 0), "");
+  const chunks = chunkText("One paragraph here.\n\nTwo paragraph here.", 20, 0);
+  assert.deepEqual(chunks.map(c => c.text), ["One paragraph here.", "Two paragraph here."]);
+});

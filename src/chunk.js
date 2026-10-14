@@ -42,6 +42,7 @@ function spans(text, size) {
 
 /** The last ~n characters of text, starting at a sentence or word boundary. */
 export function tail(text, n) {
+  if (n <= 0) return ""; // slice(-0) would return the whole text
   if (text.length <= n) return text;
   let t = text.slice(-n);
   if (isLowSurrogate(t.charCodeAt(0))) t = t.slice(1);
