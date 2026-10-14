@@ -1,0 +1,11 @@
+# Keys never live in this repo; these guard against accidents.
+*.key
+.env
+.env.*
+*api_key*
+# Build output
+dist/
+*.zip
+*.crx
+*.pem
+node_modules/
