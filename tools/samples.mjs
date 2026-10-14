@@ -1,0 +1,17 @@
+// The six sample paragraphs, with the fallacies each is written to commit. The last is a control.
+export const SAMPLES = [
+  { name: "Town council", expect: ["slippery_slope", "strawman", "ad_hominem"],
+    text: "My opponent wants to add a bike lane on Elm Street. Let's be honest about what that really means: she wants to ban cars from this town entirely. First it's one lane, then it's two, then parking meters triple and nobody can drive to the grocery store, and before you know it the whole downtown is a ghost town. And frankly, what would she know about running a town? She's lived here three years and still can't keep her own lawn mowed." },
+  { name: "Supplement ad", expect: ["appeal_to_nature", "anecdotal", "bandwagon", "appeal_to_authority"],
+    text: "VitaRoot is made from 100% natural herbs, so unlike those chemical-laden pharmacy pills, it simply can't hurt you. My uncle started taking it last spring and hasn't had a single cold since. Over two million Americans have already made the switch, so they can't all be wrong. Dr. Reynolds, a celebrated chiropractor who has appeared on morning television, calls it \"the most important health discovery of the century.\"" },
+  { name: "Dinner argument", expect: ["tu_quoque", "black_or_white", "loaded_question", "burden_of_proof"],
+    text: "You're telling me to cut back on sugar? You had two slices of cake at Mom's birthday last week, so you're hardly one to talk. Look, either I eat whatever I want or I live a miserable joyless life, and I'm picking the first one. Anyway, have you stopped nagging everyone about their diets yet? And until you can prove sugar is what's causing my headaches, I'm going to assume it isn't." },
+  { name: "Faith in the fund", expect: ["gamblers_fallacy", "texas_sharpshooter", "false_cause", "special_pleading"],
+    text: "The fund has lost money five quarters in a row, so it's practically guaranteed to rebound this quarter. Odds have to even out eventually. And look at the chart: every time the manager wore his red tie to the shareholder meeting, returns went up the following month. Clearly the tie works. Sure, the losses in 2024 don't fit the pattern, but that year was different and doesn't really count." },
+  { name: "Philosophy club", expect: ["no_true_scotsman", "begging_the_question", "personal_incredulity", "genetic", "middle_ground"],
+    text: "No real philosopher would ever take utilitarianism seriously. Professor Hale does, which only shows he isn't a real philosopher. The Bible is true because it says it's the word of God, and God doesn't lie. I can't imagine how something as complex as the eye could have evolved by chance, so it obviously didn't. Besides, the theory of evolution came from a Victorian gentleman with a beard, so why trust it? The truth is probably somewhere in the middle anyway." },
+  { name: "Control", expect: [],
+    text: "The city's 2025 traffic report found that collisions on Elm Street fell by 18 percent in the year after the speed limit was lowered from 35 to 25 mph. Other changes happened that year too, including new crosswalk signals and a temporary road closure for construction, so the report's authors caution that the speed limit can't be credited with the whole drop. They recommend a two-year comparison with similar streets nearby before deciding whether to apply the lower limit elsewhere." },
+];
+
+export const NEEDLE = "The encoder has failed on five consecutive test runs, so the sixth run is almost certain to succeed, since failures have to even out eventually.";
