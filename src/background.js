@@ -38,13 +38,18 @@ async function check(info, tab) {
 // The e2e tests call this directly, because a headless browser can't click a context menu.
 globalThis.fallacyLensCheck = check;
 
+// "Open settings" in the card. A one-off message rather than the port, because it wakes a stopped worker.
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg?.type === "options" && sender.id === chrome.runtime.id) chrome.runtime.openOptionsPage();
+});
+
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== PORT_NAME || port.sender?.id !== chrome.runtime.id) return;
   const ctrl = new AbortController();
   port.onDisconnect.addListener(() => ctrl.abort());
   const post = msg => { try { port.postMessage(msg); } catch { /* the card was closed */ } };
   port.onMessage.addListener(async msg => {
-    if (msg?.type === "options") return chrome.runtime.openOptionsPage();
+    if (msg?.type === "ping") return post({ type: "pong" }); // the card's heartbeat keeps this worker alive
     if (msg?.type !== "check") return;
     let text = typeof msg.text === "string" ? msg.text : "";
     if (typeof msg.token === "string") {

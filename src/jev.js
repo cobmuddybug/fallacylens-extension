@@ -52,7 +52,8 @@ export function buildPayload(text, index, total) {
 
 const clamp01 = v => Math.max(0, Math.min(1, v));
 
-export function yesProbability(answer) {
+/** The yes-probability in an answer, or null when the answer has no field we recognise. */
+function readProbability(answer) {
   for (const k of ["noul", "probability"]) {
     const v = Number(answer?.[k]);
     if (answer?.[k] != null && Number.isFinite(v)) return clamp01(v);
@@ -60,10 +61,17 @@ export function yesProbability(answer) {
   const probs = answer?.probabilities;
   if (probs && typeof probs === "object") {
     const v = Number(probs.true ?? probs.yes);
-    if (Number.isFinite(v)) return clamp01(v);
+    if ((probs.true ?? probs.yes) != null && Number.isFinite(v)) return clamp01(v);
   }
-  return 0;
+  return null;
 }
+
+export function yesProbability(answer) {
+  return readProbability(answer) ?? 0;
+}
+
+// If no question has a score we can read, the API's format has changed: say so rather than show zeros.
+const hasScores = data => Object.entries(data.answers).some(([id, ans]) => BY_ID[id] && readProbability(ans) !== null);
 
 /** {fallacy id: 0-100} from one Jev response; unanswered questions are left out. */
 export function scoresFrom(response) {
@@ -74,6 +82,7 @@ export function scoresFrom(response) {
   return out;
 }
 
+const FETCH_TIMEOUT_MS = 60_000;
 const RETRYABLE = new Set([408, 409, 429, 499, 500, 502, 503, 504]);
 
 function realSleep(ms, signal) {
@@ -91,30 +100,34 @@ function errorDetail(data, raw) {
   };
 }
 
-export async function askJev(key, text, index, total, { fetch, signal, sleep = realSleep, retries = RETRIES } = {}) {
+export async function askJev(key, text, index, total, { fetch, signal, sleep = realSleep, retries = RETRIES, timeoutMs = FETCH_TIMEOUT_MS } = {}) {
   const body = JSON.stringify(buildPayload(text, index, total));
   let last;
   for (let attempt = 1; attempt <= retries; attempt++) {
     if (signal?.aborted) throw aborted();
     let res = null, wait = Math.min(10, 2 * attempt) * 1000;
+    const timeout = AbortSignal.timeout(timeoutMs);
+    const attemptSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
     try {
       res = await fetch(DECISIONS_URL, {
-        method: "POST", body, signal,
+        method: "POST", body, signal: attemptSignal,
         headers: {
           Authorization: `Bearer ${key}`, "Content-Type": "application/json",
           "HTTP-Referer": REFERER, "X-OpenRouter-Title": TITLE,
         },
       });
     } catch (e) {
-      if (signal?.aborted || e?.name === "AbortError") throw aborted();
-      last = new JevError(`could not reach OpenRouter: ${e?.message ?? e}`, { type: "network" });
+      if (signal?.aborted) throw aborted();
+      last = timeout.aborted
+        ? new JevError("OpenRouter took too long to answer", { type: "network" })
+        : new JevError(`could not reach OpenRouter: ${e?.message ?? e}`, { type: "network" });
     }
     if (res) {
       const raw = await res.text().catch(() => "");
       let data = null;
       try { data = JSON.parse(raw); } catch { /* not JSON */ }
       if (res.ok) {
-        if (!data || typeof data.answers !== "object" || data.answers === null) {
+        if (!data || typeof data.answers !== "object" || data.answers === null || !hasScores(data)) {
           throw new JevError(`Jev returned no answers: ${raw.slice(0, 300)}`, { status: res.status, type: "format" });
         }
         return data;

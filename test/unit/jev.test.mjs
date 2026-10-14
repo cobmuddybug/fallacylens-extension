@@ -171,3 +171,20 @@ test("analyze: an outer abort rejects as aborted", async () => {
   const f = fakeFetch(async () => { ctrl.abort(); throw new DOMException("aborted", "AbortError"); });
   await assert.rejects(analyze(KEY, TEXT, { fetch: f, signal: ctrl.signal, sleep: noSleep }), e => e.type === "aborted");
 });
+
+test("askJev treats answers with no recognisable scores as a format change", async () => {
+  for (const answersBody of [{}, { strawman: { value: 0.9 }, bandwagon: { score: 1 } }, { mystery: { noul: 0.5 } }]) {
+    const f = fakeFetch(() => ({ body: { answers: answersBody } }));
+    await assert.rejects(askJev(KEY, TEXT, 0, 1, { fetch: f, sleep: noSleep }), e => e.type === "format", JSON.stringify(answersBody));
+    assert.equal(f.calls.length, 1);
+  }
+});
+
+test("askJev times out a stalled request and retries it as a network error", async () => {
+  const f = fakeFetch(call => new Promise((_, reject) => {
+    call.init.signal.addEventListener("abort", () => reject(new DOMException("timed out", "TimeoutError")), { once: true });
+  }));
+  await assert.rejects(askJev(KEY, TEXT, 0, 1, { fetch: f, sleep: noSleep, retries: 2, timeoutMs: 30 }),
+    e => e.type === "network" && /too long/.test(e.message));
+  assert.equal(f.calls.length, 2);
+});

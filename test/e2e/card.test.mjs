@@ -177,3 +177,37 @@ test("restricted page falls back to a popup window", async () => {
   await waitFor(() => popup.eval(`document.querySelector("fallacy-lens-card")?.shadowRoot?.textContent.includes("Slippery slope")`), { what: "popup results" });
   await env.cdp.send("Target.closeTarget", { targetId: info.targetId });
 });
+
+test("select-all keeps the card on screen", async () => {
+  const page = await fresh("/page.html");
+  const text = await page.eval("(() => { getSelection().selectAllChildren(document.body); return getSelection().toString(); })()");
+  await page.check(text);
+  const c = await cardSays(page, /Slippery slope/, "results");
+  const vh = await page.eval("innerHeight");
+  assert.ok(c.top >= 0 && c.bottom <= vh, `card ${c.top}..${c.bottom} should be inside the ${vh}px viewport`);
+  await page.close();
+});
+
+test("card shows above a modal dialog and its close button works", async () => {
+  const page = await fresh("/dialog.html");
+  await checkOn(page, "fallacy");
+  const c = await cardSays(page, /Slippery slope/, "results");
+  const hit = await page.eval(`(() => { const host = document.querySelector("fallacy-lens-card"), b = host.getBoundingClientRect();
+    return document.elementFromPoint(b.left + b.width / 2, b.top + 20) === host; })()`);
+  assert.ok(hit, "the card, not the dialog, should be on top");
+  const x = await page.eval(`(() => { const b = document.querySelector("fallacy-lens-card").shadowRoot.querySelector("button.close").getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
+  for (const type of ["mousePressed", "mouseReleased"]) {
+    await page.send("Input.dispatchMouseEvent", { type, x: x[0], y: x[1], button: "left", clickCount: 1 });
+  }
+  await waitFor(async () => (await page.card()) === null, { what: "real click on ✕ closes the card" });
+  assert.ok(c.width > 0);
+  await page.close();
+});
+
+test("the card sends a heartbeat while a check is running", async () => {
+  const page = await fresh("/page.html");
+  await checkOn(page, "slow");
+  await cardSays(page, /No fallacies scored/, "slow result");
+  assert.match((await page.card()).log, /"type":"pong"/, "background should answer the card's pings");
+  await page.close();
+});

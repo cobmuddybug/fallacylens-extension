@@ -6,6 +6,7 @@
   const SHADOW_MODE = "closed"; // the e2e test build switches this to "open" so tests can read the card
   const WIDTH = 340;
   const GAP = 8;
+  const PING_MS = 20_000; // Chrome stops a worker after 30 s without messages, even with a port open
   const popup = location.protocol === "chrome-extension:";
 
   globalThis.__fallacyLensClose?.(); // one card per tab: a new check replaces the old one
@@ -97,10 +98,21 @@
     return { top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX };
   }
 
+  /** Where to attach the card: inside an open modal dialog holding the selection (everything outside one
+   *  is inert, so clicks wouldn't reach the card), else the document. */
+  function parentFor() {
+    const sel = getSelection();
+    const node = sel?.rangeCount ? sel.getRangeAt(0).commonAncestorContainer : document.activeElement;
+    const el = node && (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement);
+    return el?.closest("dialog:modal") || document.documentElement;
+  }
+
   const text = popup ? "" : selectedText();
   const anchor = popup ? null : anchorRect();
 
   const host = document.createElement("fallacy-lens-card");
+  // A manual popover lives in the top layer, so modal dialogs and fullscreen elements can't cover it.
+  if (!popup) host.setAttribute("popover", "manual");
   host.style.cssText = popup ? "all: initial; display: block;" : "all: initial; position: absolute; z-index: 2147483647; top: 0; left: 0;";
   const root = host.attachShadow({ mode: SHADOW_MODE });
   try {
@@ -117,7 +129,8 @@
       h("button", { class: "close", type: "button", "aria-label": "Close", text: "✕", onclick: () => close() })),
     main, foot);
   root.append(card);
-  (popup ? document.body : document.documentElement).append(host);
+  (popup ? document.body : parentFor()).append(host);
+  if (!popup) try { host.showPopover(); } catch { /* no popover support: plain z-index stacking */ }
 
   function place() {
     if (popup) return;
@@ -127,10 +140,13 @@
     const maxLeft = scrollX + vw - width - GAP;
     const left = Math.max(scrollX + GAP, Math.min(anchor ? anchor.left : maxLeft, maxLeft));
     const height = host.offsetHeight;
-    let top = scrollY + GAP;
+    const viewTop = scrollY + GAP, viewBottom = scrollY + innerHeight - height - GAP;
+    let top = viewTop;
     if (anchor) {
       const below = anchor.bottom + GAP, above = anchor.top - GAP - height;
-      top = below + height > scrollY + innerHeight && above >= scrollY ? above : below;
+      if (below <= viewBottom) top = below;
+      else if (above >= viewTop) top = above;
+      else top = Math.max(viewTop, Math.min(below, viewBottom)); // e.g. select-all: overlap the text, stay visible
     }
     host.style.left = `${left}px`;
     host.style.top = `${top}px`;
@@ -194,7 +210,7 @@
   function failure(m) {
     const nodes = [h("p", { class: m.kind === "short" || m.kind === "nokey" ? "calm" : "warn", text: m.message })];
     if (m.kind === "nokey" || m.kind === "key") {
-      nodes.push(h("button", { class: "action", type: "button", text: "Open settings", onclick: () => port.postMessage({ type: "options" }) }));
+      nodes.push(h("button", { class: "action", type: "button", text: "Open settings", onclick: () => chrome.runtime.sendMessage({ type: "options" }) })); // wakes the worker even if the port is gone
     }
     show(...nodes);
   }
@@ -207,6 +223,10 @@
     else if (m.type === "done") { finished = true; results(m); }
     else if (m.type === "error") { finished = true; failure(m); }
   });
+  const heartbeat = setInterval(() => {
+    if (finished) return clearInterval(heartbeat);
+    try { port.postMessage({ type: "ping" }); } catch { clearInterval(heartbeat); }
+  }, PING_MS);
   port.onDisconnect.addListener(() => {
     if (!finished) { finished = true; failure({ kind: "other", message: "Fallacy Lens stopped unexpectedly. Try the check again." }); }
   });

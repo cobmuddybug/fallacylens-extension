@@ -20,6 +20,9 @@ const PAGES = {
     <div style="height:2000px"></div></body>` },
   "/flip.html": { html: `<!doctype html><meta charset="utf-8"><body style="margin:0;font:16px serif">
     <div style="height:1500px"></div><p id="fallacy" style="margin:0 40px">${FALLACY}</p><div style="height:1500px"></div></body>` },
+  "/dialog.html": { html: `<!doctype html><meta charset="utf-8"><body><p>Behind the dialog.</p>
+    <dialog id="d"><p id="fallacy">${FALLACY}</p></dialog>
+    <script>document.getElementById("d").showModal()</script></body>` },
   "/csp.html": { headers: { "Content-Security-Policy": "default-src 'none'" },
     html: `<!doctype html><meta charset="utf-8"><body><p id="fallacy">${FALLACY}</p></body>` },
 };
@@ -36,6 +39,9 @@ function buildTestCopy(origin) {
   patch(join(dir, "src/config.js"), "https://openrouter.ai/api/alpha/decisions", `${origin}/api/alpha/decisions`);
   patch(join(dir, "src/config.js"), "https://openrouter.ai/api/v1/key", `${origin}/api/v1/key`);
   patch(join(dir, "src/card.js"), 'const SHADOW_MODE = "closed";', 'const SHADOW_MODE = "open";');
+  if (readFileSync(join(dir, "src/card.js"), "utf8").includes("const PING_MS = 20_000;")) {
+    patch(join(dir, "src/card.js"), "const PING_MS = 20_000;", "const PING_MS = 200;"); // fast heartbeat for tests
+  }
   patch(join(dir, "src/card.js"), "/* e2e-log */", 'host.dataset.log = (host.dataset.log || "") + JSON.stringify(m) + "\\n";');
   const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
   m.host_permissions.push("http://127.0.0.1/*"); // lets tests inject without a real right-click (activeTab)
@@ -201,6 +207,12 @@ export async function setup() {
 
   return {
     cdp, sw, server, extId, openPage,
+    /** Stop the service worker, as Chrome does after 30 s idle. env.sw is unusable afterwards. */
+    async stopWorker() {
+      await cdp.send("Target.detachFromTarget", { sessionId: sw.sessionId });
+      await cdp.send("Target.closeTarget", { targetId: sw.targetId });
+      await waitFor(async () => !(await cdp.send("Target.getTargets")).targetInfos.some(t => t.targetId === sw.targetId), { what: "worker stopped" });
+    },
     setKey: key => sw.eval(key ? `chrome.storage.local.set({ key: ${JSON.stringify(key)} })` : `chrome.storage.local.remove("key")`),
     close: cleanup,
   };
