@@ -19,8 +19,9 @@ Settings are always one click away on the toolbar icon.
 ## Privacy
 
 Selected text is sent to OpenRouter and Jev's maker, TypeSafe, only when you choose
-**Check for fallacies**. There is no analytics and no history. Your key and your threshold are stored
-in `chrome.storage.local` on your device and are only ever sent to OpenRouter.
+**Check for fallacies**. There is no analytics and no history. Your key is stored on your device in
+the extension's own IndexedDB, which web pages and the extension's in-page card can't read, and is only
+ever sent to OpenRouter. The score threshold is kept in `chrome.storage.local`.
 
 ## How scoring works
 

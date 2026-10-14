@@ -175,6 +175,8 @@ test("restricted page falls back to a popup window", async () => {
   const info = await findTarget(env.cdp, t => t.url.includes("/src/popup-card.html#"), "popup window");
   const popup = await attach(env.cdp, info.targetId);
   await waitFor(() => popup.eval(`document.querySelector("fallacy-lens-card")?.shadowRoot?.textContent.includes("Slippery slope")`), { what: "popup results" });
+  await popup.send("Page.reload");
+  await waitFor(() => popup.eval(`document.querySelector("fallacy-lens-card")?.shadowRoot?.textContent.includes("expired")`), { what: "reloaded popup says the check expired" });
   await env.cdp.send("Target.closeTarget", { targetId: info.targetId });
 });
 
@@ -230,5 +232,82 @@ test("a key saved by an older version is moved out of chrome.storage.local", asy
   await cardSays(page, /Slippery slope/, "results with the migrated key");
   assert.equal(await env.getKey(), GOOD_KEY);
   assert.equal((await env.sw.eval("chrome.storage.local.get(null)")).key, undefined);
+  await page.close();
+});
+
+test("partial results say why parts failed", async () => {
+  const page = await fresh("/parts.html");
+  await checkOn(page, "long");
+  const c = await cardSays(page, /parts failed/, "partial warning");
+  assert.match(c.text, /1 of 2 parts failed/);
+  assert.match(c.text, /OpenRouter 400: fake part failure/);
+  await page.close();
+});
+
+test("card is re-placed when the window narrows", async () => {
+  const page = await fresh("/page.html");
+  await checkOn(page, "fallacy");
+  await cardSays(page, /Slippery slope/, "results");
+  await page.eval(`(() => { const p = document.getElementById("fallacy"); p.style.marginLeft = "700px"; })()`);
+  await page.send("Emulation.setDeviceMetricsOverride", { width: 320, height: 640, deviceScaleFactor: 1, mobile: false });
+  const vw = await page.eval("document.documentElement.clientWidth");
+  await waitFor(async () => { const c = await page.card(); return c.right <= vw - 7.5 && c.left >= 7.5; }, { what: `card inside ${vw}px after resize` });
+  await page.close();
+});
+
+test("a tel field's selection is checked even with no fallback text", async () => {
+  const page = await fresh("/fields.html");
+  await page.eval(`(() => { const el = document.getElementById("tel"); el.focus(); el.select(); })()`);
+  await page.check("");
+  await cardSays(page, /No fallacies scored|Slippery/, "a result, not 'select a sentence'");
+  assert.match(env.server.state.requests.at(-1).record, /ghosts aren't real/);
+  await page.close();
+});
+
+test("a textarea inside a shadow root keeps its line breaks", async () => {
+  const page = await fresh("/fields.html");
+  await page.eval(`(() => { const t = document.getElementById("box").shadowRoot.getElementById("inner"); t.focus(); t.select(); })()`);
+  await page.check("First line of the shadow field, long enough. Second part, slippery as ever.");
+  await cardSays(page, /Slippery slope/, "results");
+  assert.match(env.server.state.requests.at(-1).record, /enough\.\n\nSecond part/);
+  await page.close();
+});
+
+test("closing gives focus back to where it was", async () => {
+  const page = await fresh("/page.html");
+  await checkOn(page, "field");
+  await cardSays(page, /Slippery slope/, "results");
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await waitFor(async () => (await page.card()) === null, { what: "closed" });
+  assert.equal(await page.eval("document.activeElement.id"), "field");
+  await page.close();
+});
+
+test("Esc typed into the page's own field leaves the card open", async () => {
+  const page = await fresh("/fields.html");
+  await page.check("Nobody has proven ghosts aren't real, so they are.");
+  await cardSays(page, /No fallacies scored|Slippery/, "a result");
+  await page.eval(`document.getElementById("other").focus()`);
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await new Promise(r => setTimeout(r, 200));
+  assert.notEqual(await page.card(), null, "Esc meant for the page's field should not close the card");
+  await page.close();
+});
+
+test("expand/collapse arrows are hidden from screen readers", async () => {
+  const page = await fresh("/page.html");
+  await checkOn(page, "fallacy");
+  await cardSays(page, /others below/, "results");
+  const hidden = await page.eval(`document.querySelector("fallacy-lens-card").shadowRoot.querySelector("button.more [aria-hidden=true]")?.textContent`);
+  assert.equal(hidden, "▸");
+  await page.close();
+});
+
+test("a check in a small iframe shows the card on the top page", async () => {
+  const page = await fresh("/frame.html");
+  await page.eval(`(() => { const d = document.getElementById("f").contentDocument, r = d.createRange();
+    r.selectNodeContents(d.getElementById("fallacy")); d.getSelection().removeAllRanges(); d.getSelection().addRange(r); })()`);
+  await page.checkInFrame("");
+  await cardSays(page, /Slippery slope/, "card in the top document");
   await page.close();
 });

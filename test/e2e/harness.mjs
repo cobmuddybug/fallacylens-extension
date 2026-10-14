@@ -23,6 +23,19 @@ const PAGES = {
   "/dialog.html": { html: `<!doctype html><meta charset="utf-8"><body><p>Behind the dialog.</p>
     <dialog id="d"><p id="fallacy">${FALLACY}</p></dialog>
     <script>document.getElementById("d").showModal()</script></body>` },
+  "/parts.html": { html: `<!doctype html><meta charset="utf-8"><body><div id="long">
+    <p>${"Calm sentence about rivers and their banks. ".repeat(1400)}</p>
+    <p>PARTFAIL ${"Another calm sentence about gardens. ".repeat(1400)}</p></div></body>` },
+  "/fields.html": { html: `<!doctype html><meta charset="utf-8"><body>
+    <input id="tel" type="tel" value="Nobody has proven ghosts aren't real, so they are.">
+    <input id="other" type="text" value="page field">
+    <shadow-box id="box"></shadow-box>
+    <script>
+      const root = document.getElementById("box").attachShadow({ mode: "open" });
+      root.innerHTML = '<textarea id="inner" rows="5" cols="40">First line of the shadow field, long enough.\\n\\nSecond part, slippery as ever.</textarea>';
+    </script></body>` },
+  "/frame.html": { html: `<!doctype html><meta charset="utf-8"><body><p>Top page.</p>
+    <iframe id="f" style="width:300px;height:150px" srcdoc="<p id='fallacy'>${FALLACY.replace(/'/g, "&#39;")}</p>"></iframe></body>` },
   "/csp.html": { headers: { "Content-Security-Policy": "default-src 'none'" },
     html: `<!doctype html><meta charset="utf-8"><body><p id="fallacy">${FALLACY}</p></body>` },
 };
@@ -71,6 +84,7 @@ async function fakeServer() {
         if (gone) return;
       }
       if (state.status) return json(state.status, { error: { message: "fake failure" } });
+      if (record.includes("PARTFAIL")) return json(400, { error: { message: "fake part failure" } });
       const hot = /ghost town|slippery/i.test(record);
       const hotScores = { slippery_slope: 0.91, strawman: 0.74, ad_hominem: 0.58 };
       const answers = {};
@@ -204,6 +218,13 @@ export async function setup() {
       await fallacyLensCheck({ menuItemId: "fallacylens-check", frameId: 0, selectionText: ${JSON.stringify(selectionText)} }, tab);
     })()`);
     page.card = () => page.eval(CARD);
+    /** Run a check as if the right-click happened inside this page's first child frame. */
+    page.checkInFrame = selectionText => sw.eval(`(async () => {
+      const tab = (await chrome.tabs.query({})).find(t => (t.url || t.pendingUrl || "") === ${JSON.stringify(url.startsWith("http") ? url : server.origin + url)});
+      const frames = await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, func: () => location.href });
+      const child = frames.find(f => f.frameId !== 0);
+      await fallacyLensCheck({ menuItemId: "fallacylens-check", frameId: child.frameId, selectionText: ${JSON.stringify(selectionText)} }, tab);
+    })()`);
     /** Evaluate in the extension's content-script world on this page (exists once a card was injected). */
     page.evalContentWorld = async expression => {
       const contexts = [];

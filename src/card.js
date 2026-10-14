@@ -57,6 +57,8 @@
     .more:hover { color: var(--fg); }
     .rest { margin-top: 4px; }
     .calm { margin: 6px 0; }
+    .warn p { margin: 0; }
+    .warn .why { margin-top: 4px; font-size: 12px; }
     .warn { margin: 6px 0; padding: 8px 10px; border-radius: 6px; color: var(--warn); background: var(--warn-bg); }
     .action { margin-top: 6px; padding: 6px 12px; border-radius: 6px; background: var(--focus); color: #fff; font-weight: 600; }
     footer { display: flex; justify-content: space-between; gap: 12px; padding: 8px 14px 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; }
@@ -79,8 +81,15 @@
     return el;
   }
 
+  /** The focused element, looking inside open shadow roots (e.g. a textarea in a web component). */
+  function deepActive() {
+    let a = document.activeElement;
+    while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement;
+    return a;
+  }
+
   function selectedText() {
-    const a = document.activeElement;
+    const a = deepActive();
     const field = a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && /^(text|search|url|email)$/i.test(a.type)));
     if (field && a.selectionEnd > a.selectionStart) return a.value.slice(a.selectionStart, a.selectionEnd);
     const s = getSelection()?.toString() ?? "";
@@ -92,7 +101,7 @@
     const empty = r => !r || (!r.width && !r.height);
     const sel = getSelection();
     let r = sel?.rangeCount ? sel.getRangeAt(0).getBoundingClientRect() : null;
-    const a = document.activeElement;
+    const a = deepActive();
     if (empty(r) && a && a !== document.body && a !== document.documentElement) r = a.getBoundingClientRect();
     if (empty(r)) return null;
     return { top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX };
@@ -108,6 +117,7 @@
   }
 
   const text = popup ? "" : selectedText();
+  const returnFocus = popup ? null : deepActive();
   const anchor = popup ? null : anchorRect();
 
   const host = document.createElement("fallacy-lens-card");
@@ -184,18 +194,24 @@
     const shown = m.rows.filter(r => r.score >= m.threshold);
     const rest = m.rows.filter(r => r.score < m.threshold);
     const nodes = [];
-    if (m.failed) nodes.push(h("p", { class: "warn", text: `${m.failed} of ${m.total} parts failed, so these may be incomplete.` }));
+    if (m.failed) {
+      const why = [...new Set(m.errors || [])];
+      nodes.push(h("div", { class: "warn" },
+        h("p", { text: `${m.failed} of ${m.total} parts failed, so these may be incomplete.` }),
+        why.map(w => h("p", { class: "why", text: w }))));
+    }
     if (shown.length) nodes.push(h("ul", { class: "rows" }, shown.map(row)));
     else nodes.push(h("p", { class: "calm", text: `No fallacies scored ${m.threshold} or more.` }));
     if (rest.length) {
       const list = h("ul", { class: "rows rest", hidden: "" }, rest.map(row));
       const label = shown.length ? `${rest.length} ${rest.length === 1 ? "other" : "others"} below ${m.threshold}` : "Show all scores";
-      const more = h("button", { class: "more", type: "button", "aria-expanded": "false", text: `▸ ${label}` });
+      const arrow = h("span", { "aria-hidden": "true", text: "▸" }); // not read aloud; aria-expanded says it
+      const more = h("button", { class: "more", type: "button", "aria-expanded": "false" }, arrow, ` ${label}`);
       more.addEventListener("click", () => {
         const open = list.hidden;
         list.hidden = !open;
         more.setAttribute("aria-expanded", String(open));
-        more.textContent = `${open ? "▾" : "▸"} ${label}`;
+        arrow.textContent = open ? "▾" : "▸";
         place();
       });
       nodes.push(more, list);
@@ -231,19 +247,25 @@
     if (!finished) { finished = true; failure({ kind: "other", message: "Fallacy Lens stopped unexpectedly. Try the check again." }); }
   });
 
+  // Esc closes the card when focus is in it (or nowhere), not when it's meant for one of the page's fields.
   function onKey(e) {
-    if (e.key === "Escape") close();
+    if (e.key !== "Escape") return;
+    const a = document.activeElement;
+    if (e.composedPath().includes(host) || !a || a === document.body || a === document.documentElement) close();
   }
   function close() {
     document.removeEventListener("keydown", onKey, true);
+    removeEventListener("resize", place);
     finished = true;
     try { port.disconnect(); } catch { /* already gone */ }
     host.remove();
+    if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
     if (globalThis.__fallacyLensClose === close) globalThis.__fallacyLensClose = undefined;
     if (popup) window.close();
   }
   globalThis.__fallacyLensClose = close;
   document.addEventListener("keydown", onKey, true);
+  addEventListener("resize", place);
 
   checking(popup ? null : { chars: text.trim().length, total: 1, done: 0 });
   port.postMessage(popup ? { type: "check", token: location.hash.slice(1) } : { type: "check", text });

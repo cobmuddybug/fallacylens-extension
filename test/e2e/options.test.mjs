@@ -57,3 +57,9 @@ test("the key is not kept in chrome.storage.local, which content scripts can rea
   await waitFor(async () => (await env.getKey()) === GOOD_KEY, { what: "key saved" });
   assert.equal((await storage()).key, undefined);
 });
+
+test("the threshold slider has an accessible label", async () => {
+  const label = await page.eval(`(() => { const id = document.getElementById("threshold").getAttribute("aria-labelledby");
+    return id && document.getElementById(id)?.textContent; })()`);
+  assert.match(label || "", /Show fallacies scoring/);
+});

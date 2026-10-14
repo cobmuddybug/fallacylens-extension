@@ -32,9 +32,9 @@
   </section>
 
   <section>
-    <h2>Show fallacies scoring</h2>
+    <h2 id="threshold-label">Show fallacies scoring</h2>
     <div class="field">
-      <input id="threshold" type="range" min="30" max="80" step="5" value="50">
+      <input id="threshold" type="range" aria-labelledby="threshold-label" min="30" max="80" step="5" value="50">
       <output id="threshold-value" for="threshold">50</output><span>or more</span>
     </div>
     <p class="tip">The card lists fallacies at or above this score first. The rest stay one click away.</p>

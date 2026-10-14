@@ -2,6 +2,7 @@
 // The only code that reads the OpenRouter key; the card receives scores, never the key.
 import { runCheck } from "./check.js";
 import * as keyStore from "./keystore.js";
+import { MAX_CHARS } from "./config.js";
 
 const MENU_ID = "fallacylens-check";
 const PORT_NAME = "fallacylens-card";
@@ -19,11 +20,31 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === MENU_ID) check(info, tab);
 });
 
+const NARROW_FRAME = 356; // a card needs 340 px plus gutters
+
+/** In a frame too small for the card, read the selection there and show the card on the top page. */
+async function chooseFrame(tabId, frameId, fallback) {
+  if (!frameId) return { frameId: 0, fallback };
+  const [probe] = await chrome.scripting.executeScript({
+    target: { tabId, frameIds: [frameId] },
+    func: () => {
+      let a = document.activeElement;
+      while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement;
+      const field = a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT") && a.selectionEnd > a.selectionStart;
+      return { width: innerWidth, text: field ? a.value.slice(a.selectionStart, a.selectionEnd) : getSelection()?.toString() ?? "" };
+    },
+  });
+  const { width, text } = probe?.result ?? {};
+  return width < NARROW_FRAME ? { frameId: 0, fallback: text?.trim() ? text : fallback } : { frameId, fallback };
+}
+
 async function check(info, tab) {
-  const fallback = info.selectionText || "";
+  let fallback = info.selectionText || "";
   if (tab?.id >= 0) {
-    const target = { tabId: tab.id, frameIds: [info.frameId ?? 0] };
     try {
+      const where = await chooseFrame(tab.id, info.frameId ?? 0, fallback);
+      fallback = where.fallback;
+      const target = { tabId: tab.id, frameIds: [where.frameId] };
       await chrome.scripting.executeScript({ target, func: t => { globalThis.__fallacyLensFallback = t; }, args: [fallback] });
       await chrome.scripting.executeScript({ target, files: ["src/card.js"] });
       return;
@@ -32,8 +53,13 @@ async function check(info, tab) {
     }
   }
   const token = crypto.randomUUID();
-  await chrome.storage.session.set({ [`popup:${token}`]: fallback });
-  await chrome.windows.create({ url: chrome.runtime.getURL(`src/popup-card.html#${token}`), type: "popup", width: 380, height: 520 });
+  try {
+    // One character over the limit is enough for the card to say the selection is too long.
+    await chrome.storage.session.set({ [`popup:${token}`]: fallback.slice(0, MAX_CHARS + 1) });
+    await chrome.windows.create({ url: chrome.runtime.getURL(`src/popup-card.html#${token}`), type: "popup", width: 380, height: 520 });
+  } catch (e) {
+    console.warn("Fallacy Lens: could not open the popup card", e);
+  }
 }
 
 // The e2e tests call this directly, because a headless browser can't click a context menu.
@@ -56,7 +82,11 @@ chrome.runtime.onConnect.addListener(port => {
     let text = typeof msg.text === "string" ? msg.text : "";
     if (typeof msg.token === "string") {
       const k = `popup:${msg.token}`;
-      text = (await chrome.storage.session.get(k))[k] ?? "";
+      const stored = (await chrome.storage.session.get(k))[k];
+      if (stored === undefined) {
+        return post({ type: "error", kind: "expired", message: "This check has expired. Select the text and check again." });
+      }
+      text = stored;
       await chrome.storage.session.remove(k);
     }
     const key = await keyStore.getKey();
